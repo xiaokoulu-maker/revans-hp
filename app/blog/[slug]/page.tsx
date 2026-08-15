@@ -154,16 +154,10 @@ export default async function BlogPostPage({
 
       <section className={styles.sec}>
         <div className={styles.layout}>
-          {/* サイドバー（目次）。モバイルでは本文の上（折りたたみ）に来る */}
-          {headings.length > 0 && (
-            <aside className={styles.aside}>
-              <div className={styles.stickyToc}>
-                <TableOfContents headings={headings} />
-              </div>
-            </aside>
-          )}
-
           <article className={styles.article}>
+            {/* 目次：PC・モバイル共通で本文冒頭（最初の H2 の前）に配置 */}
+            {headings.length > 0 && <TableOfContents headings={headings} />}
+
             <ArticleBody body={post.body} ctaBeforeId={ctaBeforeId} />
 
             {post.faq && post.faq.length > 0 && (

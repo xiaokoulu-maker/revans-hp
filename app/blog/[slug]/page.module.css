@@ -9,18 +9,14 @@
   border-radius: 28px 28px 0 0;
 }
 
-/* モバイル優先：単カラム（source 順で 目次→本文）。
-   デスクトップで本文左・目次右の2カラムへ。 */
+/* 単カラム。本文は最大幅 760px で中央寄せ（目次は本文冒頭に内包）。 */
 .layout {
   max-width: 760px;
   margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 28px;
 }
 
 .article {
-  min-width: 0; /* grid 内で pre/table のはみ出しを許容 */
+  min-width: 0; /* pre/table のはみ出しを許容 */
 }
 
 /* FAQ ブロック（白背景側。SectionLabel の見出し色を継承させる） */
@@ -32,11 +28,6 @@
 }
 .faqInner {
   margin-top: 24px;
-}
-
-/* 目次サイド */
-.stickyToc {
-  position: static;
 }
 
 /* ── 関連記事（白背景側） ── */
@@ -56,30 +47,9 @@
   gap: 20px;
 }
 
-/* ── デスクトップ 2カラム ── */
 @media (min-width: 1024px) {
   .sec {
     padding: 64px var(--pad-x) 96px;
-  }
-  .layout {
-    max-width: var(--maxw);
-    grid-template-columns: minmax(0, 720px) 280px;
-    justify-content: center;
-    gap: 56px;
-    align-items: start;
-  }
-  /* source では aside が先だが、配置で本文を左・目次を右に固定 */
-  .article {
-    grid-column: 1;
-    grid-row: 1;
-  }
-  .aside {
-    grid-column: 2;
-    grid-row: 1;
-  }
-  .stickyToc {
-    position: sticky;
-    top: calc(var(--header-h) + 24px);
   }
 }
 

@@ -1,5 +1,6 @@
-/* 目次（白背景側）。PC=サイドバー追従 / モバイル=折りたたみ */
+/* 記事冒頭の目次（白背景側）。PC・モバイル共通で同じ見た目・同じ位置。 */
 .toc {
+  margin: 0 0 40px;
   border-radius: 14px;
   background: #fff;
   border: 1px solid #e5e9f0;
@@ -10,7 +11,6 @@
 .summary {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 10px;
   padding: 16px 20px;
   cursor: pointer;
@@ -26,9 +26,15 @@
   font-weight: 700;
   color: #1e4fe0;
 }
+.summaryText {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0a1220;
+}
 .chevron {
   width: 9px;
   height: 9px;
+  margin-left: auto;
   border-right: 2px solid #6b7a94;
   border-bottom: 2px solid #6b7a94;
   transform: rotate(45deg);
@@ -41,55 +47,65 @@
 .list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: 4px 16px 18px;
+  padding: 2px 16px 12px;
+  margin: 0;
+  list-style: none;
+  border-top: 1px solid #eef1f6;
 }
 .item {
   position: relative;
 }
+/* タップ領域は行全体・高さ44px目安（モバイルで押しやすく） */
 .link {
-  display: block;
-  padding: 8px 0 8px 14px;
-  font-size: 13.5px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 6px 4px;
+  font-size: 14px;
   line-height: 1.6;
-  color: #5b6675;
-  border-left: 2px solid #e5e9f0;
-  transition: color 0.2s var(--ease), border-color 0.2s var(--ease),
-    font-weight 0.1s var(--ease);
+  color: #3b4657;
+  transition: color 0.2s var(--ease);
 }
 .link:hover {
   color: #1e4fe0;
-  border-left-color: #4a82f7;
 }
-/* h3 はインデント＋小さめ */
-.sub .link {
-  padding-left: 28px;
-  font-size: 12.5px;
-  color: #7c8798;
+.link:hover .num {
+  background: #1e4fe0;
+  color: #fff;
 }
-/* 現在読んでいる見出し */
-.active {
+/* H2 連番バッジ */
+.num {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  background: #eef3ff;
   color: #1e4fe0;
+  font-size: 12.5px;
   font-weight: 700;
-  border-left-color: #1e4fe0;
+  transition: background 0.2s var(--ease), color 0.2s var(--ease);
 }
-
-/* ── PC（1024px以上）: summary を隠して常時展開・追従サイドバー ── */
-@media (min-width: 1024px) {
-  .summary {
-    padding: 18px 20px 6px;
-    cursor: default;
-  }
-  .chevron {
-    display: none;
-  }
-  .label {
-    pointer-events: none;
-  }
+.text {
+  min-width: 0;
 }
-
-@media (max-width: 1023px) {
-  .list {
-    padding-top: 0;
-  }
+/* H3：字下げ＋小さめ。左に階層コネクタ */
+.sub .link {
+  padding-left: 34px;
+  font-size: 13px;
+  color: #6b7688;
+}
+.sub .link::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  width: 6px;
+  height: 6px;
+  margin-top: -4px;
+  border-left: 1.5px solid #c4cddc;
+  border-bottom: 1.5px solid #c4cddc;
 }
