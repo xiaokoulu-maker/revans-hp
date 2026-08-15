@@ -55,7 +55,35 @@ function toSummary(p: BlogPost): BlogPostSummary {
     excerpt: p.excerpt,
     publishedAt: p.publishedAt,
     category: p.category,
+    readingMinutes: readingMinutes(p.body),
   };
+}
+
+/**
+ * 本文 Markdown から読了時間（分）を算出する。
+ * 日本語は約550字/分。Markdown 記号・URL・空白はノイズなので概算で除外し、
+ * 最低1分を返す。
+ */
+export function readingMinutes(markdown: string, cpm = 550): number {
+  const text = (markdown ?? '')
+    .replace(/```[\s\S]*?```/g, ' ') // コードブロック除外
+    .replace(/!?\[[^\]]*\]\([^)]*\)/g, ' ') // 画像・リンクの記法除外
+    .replace(/[#>*_`~|\-\s]/g, ''); // Markdown記号・空白除外
+  return Math.max(1, Math.round(text.length / cpm));
+}
+
+/**
+ * 本文中間に差し込むインラインCTAの直前に置く h2 見出し id を選ぶ。
+ * h2 が3つ以上あるときだけ、（先頭と末尾＝まとめ を避けた）中央付近の h2 を1つ返す。
+ * 少ない記事では null（挿入しない ＝ 控えめ運用）。
+ */
+export function pickInlineCtaHeadingId(headings: PostHeading[]): string | null {
+  const h2s = headings.filter((h) => h.level === 2);
+  if (h2s.length < 3) return null;
+  // 先頭は避け、末尾（まとめ等）も避けた中央付近
+  const candidates = h2s.slice(1, h2s.length - 1);
+  if (candidates.length === 0) return null;
+  return candidates[Math.floor((candidates.length - 1) / 2)].id;
 }
 
 /**

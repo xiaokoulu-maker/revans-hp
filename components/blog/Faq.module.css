@@ -1,16 +1,20 @@
+/* FAQアコーディオン（白背景側） */
 .faq {
   display: flex;
   flex-direction: column;
   gap: 14px;
 }
 .item {
-  border-radius: var(--r-card);
-  background: linear-gradient(165deg, rgba(19, 36, 65, 0.7), rgba(10, 18, 32, 0.7));
-  border: 1px solid rgba(77, 163, 255, 0.16);
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #e5e9f0;
+  box-shadow: 0 4px 16px rgba(10, 18, 32, 0.04);
   overflow: hidden;
+  transition: border-color 0.2s var(--ease), box-shadow 0.2s var(--ease);
 }
 .item[open] {
-  border-color: rgba(77, 163, 255, 0.4);
+  border-color: #c9d8ff;
+  box-shadow: 0 8px 24px rgba(30, 79, 224, 0.08);
 }
 
 .q {
@@ -20,12 +24,11 @@
   padding: 20px 22px;
   cursor: pointer;
   list-style: none;
-  color: var(--text);
+  color: #0a1220;
   font-weight: 700;
-  font-size: 15.5px;
+  font-size: 16px;
   line-height: 1.6;
 }
-/* デフォルトの三角マーカーを消す */
 .q::-webkit-details-marker {
   display: none;
 }
@@ -34,13 +37,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   border-radius: 999px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
-  color: var(--blue-light);
-  background: rgba(46, 107, 255, 0.14);
+  color: #1e4fe0;
+  background: #eef3ff;
 }
 .qText {
   flex: 1;
@@ -49,8 +52,8 @@
   flex-shrink: 0;
   width: 10px;
   height: 10px;
-  border-right: 2px solid var(--text-sub);
-  border-bottom: 2px solid var(--text-sub);
+  border-right: 2px solid #8792a3;
+  border-bottom: 2px solid #8792a3;
   transform: rotate(45deg);
   transition: transform 0.25s var(--ease);
 }
@@ -65,13 +68,13 @@
   padding: 0 22px 22px;
 }
 .markA {
-  color: var(--accent);
-  background: rgba(255, 106, 44, 0.12);
+  color: #ff6a2c;
+  background: #fff0e8;
 }
 .aText {
   flex: 1;
-  padding-top: 2px;
-  font-size: 14.5px;
+  padding-top: 3px;
+  font-size: 15px;
   line-height: 1.9;
-  color: var(--text-body);
+  color: #3a4658;
 }

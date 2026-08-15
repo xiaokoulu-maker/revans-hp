@@ -72,6 +72,31 @@
   color: var(--text-body);
 }
 
+/* 記事メタ（公開日・更新日・読了時間）。ダーク側で控えめに */
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  margin-top: 4px;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--text-weak);
+}
+.meta :global(.metaItem) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.meta :global(.metaItem)::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--blue-light);
+  box-shadow: 0 0 8px rgba(77, 163, 255, 0.7);
+}
+
 @media (max-width: 768px) {
   .hero {
     padding: 88px 24px 56px;

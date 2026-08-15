@@ -1,0 +1,67 @@
+/* 本文中間の控えめなインラインCTA（白背景側） */
+.wrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin: 44px 0;
+  padding: 22px 26px;
+  border-radius: 16px;
+  background: linear-gradient(120deg, #eef3ff, #f6f9ff);
+  border: 1px solid #d6e2ff;
+}
+.text {
+  min-width: 0;
+}
+.label {
+  display: inline-block;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #1e4fe0;
+}
+.body {
+  margin: 0;
+  font-size: 14.5px;
+  line-height: 1.7;
+  color: #33404f;
+}
+.btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  border-radius: 999px;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(120deg, #1e4fe0, #4a82f7);
+  box-shadow: 0 8px 20px rgba(30, 79, 224, 0.25);
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease);
+}
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 26px rgba(30, 79, 224, 0.32);
+}
+.arrow {
+  transition: transform 0.2s var(--ease);
+}
+.btn:hover .arrow {
+  transform: translateX(3px);
+}
+
+@media (max-width: 640px) {
+  .wrap {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 20px;
+  }
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

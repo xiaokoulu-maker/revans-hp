@@ -1,46 +1,95 @@
+/* 目次（白背景側）。PC=サイドバー追従 / モバイル=折りたたみ */
 .toc {
-  padding: 22px 24px;
-  border-radius: var(--r-card);
-  background: rgba(14, 26, 46, 0.6);
-  border: 1px solid rgba(77, 163, 255, 0.16);
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #e5e9f0;
+  box-shadow: 0 6px 20px rgba(10, 18, 32, 0.05);
+  overflow: hidden;
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 16px 20px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+.summary::-webkit-details-marker {
+  display: none;
 }
 .label {
-  display: block;
-  margin-bottom: 14px;
   font-size: 12px;
   letter-spacing: 0.16em;
-  color: var(--blue-light);
+  font-weight: 700;
+  color: #1e4fe0;
 }
+.chevron {
+  width: 9px;
+  height: 9px;
+  border-right: 2px solid #6b7a94;
+  border-bottom: 2px solid #6b7a94;
+  transform: rotate(45deg);
+  transition: transform 0.25s var(--ease);
+}
+.toc[open] .chevron {
+  transform: rotate(-135deg);
+}
+
 .list {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  padding: 4px 16px 18px;
 }
 .item {
   position: relative;
 }
 .link {
   display: block;
-  padding: 7px 0 7px 16px;
+  padding: 8px 0 8px 14px;
   font-size: 13.5px;
   line-height: 1.6;
-  color: var(--text-weak);
-  border-left: 2px solid rgba(77, 163, 255, 0.2);
-  transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+  color: #5b6675;
+  border-left: 2px solid #e5e9f0;
+  transition: color 0.2s var(--ease), border-color 0.2s var(--ease),
+    font-weight 0.1s var(--ease);
 }
 .link:hover {
-  color: var(--blue-light);
-  border-left-color: var(--blue-light);
+  color: #1e4fe0;
+  border-left-color: #4a82f7;
 }
 /* h3 はインデント＋小さめ */
 .sub .link {
-  padding-left: 30px;
+  padding-left: 28px;
   font-size: 12.5px;
-  color: var(--text-sub);
+  color: #7c8798;
+}
+/* 現在読んでいる見出し */
+.active {
+  color: #1e4fe0;
+  font-weight: 700;
+  border-left-color: #1e4fe0;
 }
 
-@media (max-width: 960px) {
-  .toc {
-    padding: 18px 20px;
+/* ── PC（1024px以上）: summary を隠して常時展開・追従サイドバー ── */
+@media (min-width: 1024px) {
+  .summary {
+    padding: 18px 20px 6px;
+    cursor: default;
+  }
+  .chevron {
+    display: none;
+  }
+  .label {
+    pointer-events: none;
+  }
+}
+
+@media (max-width: 1023px) {
+  .list {
+    padding-top: 0;
   }
 }

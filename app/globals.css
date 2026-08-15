@@ -19,6 +19,8 @@
   --accent: #ff6a2c; /* アクセント（オレンジ） */
   --accent-light: #ff8a4c; /* アクセント明（グラデ用） */
 
+  --article-surface: #f6f8fc; /* 記事本文レイヤー（白背景側）の面色 */
+
   --text: #f6f8fc; /* ライト（文字） */
   --text-strong: #c6d2e6; /* 本文（明） */
   --text-body: #a9b8d1; /* 本文（標準） */

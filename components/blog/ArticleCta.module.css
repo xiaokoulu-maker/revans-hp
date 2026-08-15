@@ -1,0 +1,86 @@
+/* 記事末CTA（白背景側） */
+.sec {
+  padding: 8px var(--pad-x) 96px;
+  background: var(--article-surface, #f6f8fc);
+}
+.card {
+  position: relative;
+  overflow: hidden;
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 56px 48px;
+  border-radius: 24px;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(125deg, #0a1220 0%, #12315c 60%, #1e4fe0 140%);
+  box-shadow: 0 30px 60px rgba(10, 18, 32, 0.22);
+}
+.eyebrow {
+  display: inline-block;
+  margin-bottom: 14px;
+  font-family: var(--font-grotesk), sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.22em;
+  color: var(--blue-light);
+}
+.title {
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1.4;
+}
+.body {
+  max-width: 620px;
+  margin: 18px auto 28px;
+  font-size: 15px;
+  line-height: 2;
+  color: #cdd9ee;
+}
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 15px 34px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 700;
+  transition: transform 0.2s var(--ease), box-shadow 0.2s var(--ease),
+    background 0.2s var(--ease);
+}
+.primary {
+  color: #fff;
+  background: linear-gradient(120deg, #ff6a2c, #ff8a4c);
+  box-shadow: 0 10px 26px rgba(255, 106, 44, 0.4);
+}
+.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(255, 106, 44, 0.5);
+}
+.ghost {
+  color: #f6f8fc;
+  border: 1px solid rgba(246, 248, 252, 0.4);
+}
+.ghost:hover {
+  background: rgba(246, 248, 252, 0.1);
+}
+
+@media (max-width: 768px) {
+  .sec {
+    padding: 8px 24px 72px;
+  }
+  .card {
+    padding: 44px 24px;
+  }
+  .title {
+    font-size: 24px;
+  }
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

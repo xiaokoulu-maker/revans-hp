@@ -79,6 +79,8 @@ export interface BlogPostSummary {
   excerpt: string;
   publishedAt: string;
   category?: string;
+  /** 読了時間（分）。本文文字数から算出（一覧・関連カードの表示用） */
+  readingMinutes?: number;
 }
 
 /** ページネーション結果 */

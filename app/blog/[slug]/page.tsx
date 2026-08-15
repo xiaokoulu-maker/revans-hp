@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Reveal from '@/components/Reveal';
 import SectionLabel from '@/components/ui/SectionLabel';
 import PageHero from '@/components/layout/PageHero';
-import CtaBand from '@/components/CtaBand';
+import ArticleCta from '@/components/blog/ArticleCta';
 import ArticleBody from '@/components/blog/ArticleBody';
 import TableOfContents from '@/components/blog/TableOfContents';
 import Faq from '@/components/blog/Faq';
@@ -15,6 +15,8 @@ import {
   getRelatedPosts,
   getHeadings,
   formatPostDate,
+  readingMinutes,
+  pickInlineCtaHeadingId,
 } from '@/lib/blog';
 import { SITE } from '@/lib/site';
 import styles from './page.module.css';
@@ -69,6 +71,10 @@ export default async function BlogPostPage({
 
   const headings = getHeadings(post);
   const related = await getRelatedPosts(post);
+  const readMin = readingMinutes(post.body);
+  const ctaBeforeId = pickInlineCtaHeadingId(headings);
+  // 更新日は公開日と異なるときだけ表示する
+  const showUpdated = post.updatedAt && post.updatedAt.slice(0, 10) !== post.publishedAt.slice(0, 10);
   const url = `${SITE.url}/blog/${post.slug}`;
   const image = `${SITE.url}${post.coverImage ?? SITE.ogImage}`;
 
@@ -129,11 +135,26 @@ export default async function BlogPostPage({
         en={post.category ?? 'COLUMN'}
         title={post.title}
         lead={post.summary ?? post.excerpt}
+        meta={
+          <>
+            <span className="metaItem">
+              <span className="font-en">公開</span>
+              <time dateTime={post.publishedAt}>{formatPostDate(post.publishedAt)}</time>
+            </span>
+            {showUpdated && (
+              <span className="metaItem">
+                <span className="font-en">更新</span>
+                <time dateTime={post.updatedAt}>{formatPostDate(post.updatedAt!)}</time>
+              </span>
+            )}
+            <span className="metaItem">約{readMin}分で読めます</span>
+          </>
+        }
       />
 
       <section className={styles.sec}>
         <div className={styles.layout}>
-          {/* サイドバー（目次）。モバイルでは本文の上に来る */}
+          {/* サイドバー（目次）。モバイルでは本文の上（折りたたみ）に来る */}
           {headings.length > 0 && (
             <aside className={styles.aside}>
               <div className={styles.stickyToc}>
@@ -143,14 +164,7 @@ export default async function BlogPostPage({
           )}
 
           <article className={styles.article}>
-            <div className={styles.metaRow}>
-              <time className={`${styles.date} font-en`} dateTime={post.publishedAt}>
-                {formatPostDate(post.publishedAt)}
-              </time>
-              {post.category && <span className={`${styles.cat} font-en`}>{post.category}</span>}
-            </div>
-
-            <ArticleBody body={post.body} />
+            <ArticleBody body={post.body} ctaBeforeId={ctaBeforeId} />
 
             {post.faq && post.faq.length > 0 && (
               <div className={styles.faqBlock}>
@@ -164,7 +178,7 @@ export default async function BlogPostPage({
         </div>
       </section>
 
-      <CtaBand body={post.ctaText} />
+      <ArticleCta body={post.ctaText} />
 
       {related.length > 0 && (
         <section className={styles.related}>
@@ -175,7 +189,7 @@ export default async function BlogPostPage({
             <div className={styles.relatedGrid}>
               {related.map((r, i) => (
                 <Reveal key={r.slug} index={i}>
-                  <BlogCard post={r} />
+                  <BlogCard post={r} variant="light" />
                 </Reveal>
               ))}
             </div>

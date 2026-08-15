@@ -37,6 +37,21 @@
   letter-spacing: 0.06em;
   color: var(--text-sub);
 }
+.read {
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--text-sub);
+}
+.read::before {
+  content: '';
+  display: inline-block;
+  width: 3px;
+  height: 3px;
+  margin: 0 8px 2px 0;
+  border-radius: 50%;
+  background: var(--text-faint);
+  vertical-align: middle;
+}
 
 .title {
   font-size: 18px;
@@ -68,4 +83,35 @@
   bottom: 0;
   height: 2px;
   background: linear-gradient(90deg, var(--blue), var(--blue-light), transparent);
+}
+
+/* ── 白背景側（関連記事）バリアント ── */
+.light {
+  background: #fff;
+  border: 1px solid #e5e9f0;
+  box-shadow: 0 6px 20px rgba(10, 18, 32, 0.05);
+}
+.light:hover {
+  border-color: #c9d8ff;
+  box-shadow: 0 20px 40px rgba(10, 18, 32, 0.1), 0 0 0 1px rgba(30, 79, 224, 0.08);
+}
+.light .tag {
+  color: #ff6a2c;
+  background: #fff0e8;
+}
+.light .date,
+.light .read {
+  color: #6b7a94;
+}
+.light .read::before {
+  background: #b8c2d2;
+}
+.light .title {
+  color: #0a1220;
+}
+.light .excerpt {
+  color: #5b6675;
+}
+.light .more {
+  color: #1e4fe0;
 }

@@ -1,214 +1,319 @@
-/* 記事本文のタイポグラフィ。サイトのトークン（濃紺×発光ブルー）に馴染ませる。
-   .prose はスコープされるため、配下の素の要素（h2/p/ul…）へ子孫セレクタで当てる。 */
+/* 記事本文のタイポグラフィ（白背景・可読性優先レイヤー）。
+   .prose はスコープされるため、配下の素の要素（h2/p/ul…）へ子孫セレクタで当てる。
+   色はダーク用トークン（--text 等）を使わず、白背景用の値をローカルに定義する。 */
 .prose {
-  color: var(--text-body);
-  font-size: 16px;
-  line-height: 2;
+  --ink: #1a1a1a; /* 本文 */
+  --ink-strong: #0a1220; /* 見出し・強調 */
+  --ink-sub: #5b6675; /* 補助 */
+  --brand: #1e4fe0; /* メインブルー */
+  --brand-light: #4a82f7; /* 明ブルー */
+  --accent: #ff6a2c; /* アクセント橙 */
+  --line: #e5e9f0; /* 罫線 */
+
+  color: var(--ink);
+  font-size: 17.5px;
+  line-height: 1.9;
   word-break: break-word;
 }
 
-/* 見出しの上マージン：h2 は :target のスクロール位置調整も効かせる */
-.prose h2,
-.prose h3,
-.prose h4 {
-  color: var(--text);
-  line-height: 1.5;
+/* ── 見出し ── */
+.prose :global(h2),
+.prose :global(h3),
+.prose :global(h4) {
+  color: var(--ink-strong);
+  line-height: 1.45;
   scroll-margin-top: calc(var(--header-h) + 24px);
+  letter-spacing: 0.01em;
 }
 
-.prose h2 {
+/* H2：左の色帯＋下ボーダーで「大きな区切り」を明示。上余白を広めに */
+.prose :global(h2) {
   position: relative;
-  margin: 56px 0 20px;
-  padding-left: 16px;
-  font-size: 24px;
-  font-weight: 700;
+  margin: 64px 0 22px;
+  padding: 0 0 14px 18px;
+  font-size: 25px;
+  font-weight: 800;
+  border-bottom: 2px solid var(--line);
 }
-/* 見出し左の発光ブルーのバー */
-.prose h2::before {
+.prose :global(h2)::before {
   content: '';
   position: absolute;
   left: 0;
-  top: 0.15em;
-  bottom: 0.15em;
-  width: 4px;
-  border-radius: 2px;
-  background: linear-gradient(180deg, var(--blue-light), var(--blue));
-  box-shadow: 0 0 14px rgba(46, 107, 255, 0.5);
+  top: 0.12em;
+  height: 1.1em;
+  width: 6px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, var(--brand-light), var(--brand));
 }
 
-.prose h3 {
-  margin: 40px 0 14px;
-  font-size: 19px;
+/* H3：左サイドライン。H2 との階層差を明確に */
+.prose :global(h3) {
+  margin: 44px 0 16px;
+  padding-left: 14px;
+  font-size: 20px;
   font-weight: 700;
-  color: var(--text-strong);
+  border-left: 4px solid var(--brand);
 }
 
-.prose h4 {
-  margin: 28px 0 12px;
-  font-size: 16.5px;
-  font-weight: 700;
-  color: var(--text-strong);
-}
-
-.prose p {
-  margin: 18px 0;
-}
-
-.prose strong {
-  color: var(--text);
+.prose :global(h4) {
+  margin: 32px 0 12px;
+  font-size: 17px;
   font-weight: 700;
 }
 
-.prose em {
-  color: var(--blue-pale);
+/* ── 段落 ── */
+.prose :global(p) {
+  margin: 22px 0;
+}
+
+/* 太字：文字色＋マーカー風の背景で視認性を上げる */
+.prose :global(strong) {
+  color: var(--ink-strong);
+  font-weight: 700;
+  background: linear-gradient(transparent 62%, rgba(74, 130, 247, 0.22) 62%);
+  padding: 0 1px;
+}
+
+.prose :global(em) {
+  color: var(--brand);
   font-style: normal;
+  font-weight: 600;
 }
 
-/* リスト */
-.prose ul,
-.prose ol {
-  margin: 18px 0;
+/* ── リンク：メインブルー＋下線 ── */
+.link {
+  color: var(--brand);
+  text-decoration: underline;
+  text-decoration-color: rgba(30, 79, 224, 0.4);
+  text-underline-offset: 3px;
+  transition: color 0.2s var(--ease), text-decoration-color 0.2s var(--ease);
+}
+.link:hover {
+  color: var(--brand-light);
+  text-decoration-color: var(--brand-light);
+}
+
+/* ── リスト ── */
+.prose :global(ul),
+.prose :global(ol) {
+  margin: 22px 0;
   padding-left: 0;
 }
-.prose ol {
+.prose :global(ol) {
   list-style: none;
   counter-reset: li;
 }
-.prose li {
+.prose :global(li) {
   position: relative;
-  margin: 10px 0;
-  padding-left: 28px;
-  color: var(--text-body);
+  margin: 12px 0;
+  padding-left: 30px;
+  color: var(--ink);
 }
-/* ul のマーカー：発光ブルーの菱形 */
-.prose ul > li::before {
+/* ul マーカー：ブルーの丸 */
+.prose :global(ul) > :global(li)::before {
   content: '';
   position: absolute;
   left: 6px;
-  top: 0.75em;
-  width: 7px;
-  height: 7px;
-  transform: rotate(45deg);
-  background: var(--blue-light);
-  box-shadow: 0 0 8px rgba(77, 163, 255, 0.6);
+  top: 0.7em;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--brand);
 }
-/* ol のマーカー：連番 */
-.prose ol > li {
+/* ol マーカー：連番バッジ */
+.prose :global(ol) > :global(li) {
   counter-increment: li;
 }
-.prose ol > li::before {
+.prose :global(ol) > :global(li)::before {
   content: counter(li);
   position: absolute;
   left: 0;
-  top: 0.15em;
+  top: 0.05em;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 20px;
+  width: 22px;
+  height: 22px;
   font-family: var(--font-grotesk), sans-serif;
   font-size: 12px;
-  font-weight: 600;
-  color: var(--blue-light);
-  border: 1px solid rgba(77, 163, 255, 0.4);
+  font-weight: 700;
+  color: #fff;
+  background: var(--brand);
   border-radius: 999px;
 }
-/* 入れ子リスト */
-.prose li > ul,
-.prose li > ol {
-  margin: 8px 0;
+.prose :global(li) > :global(ul),
+.prose :global(li) > :global(ol) {
+  margin: 10px 0;
 }
 
-/* リンク */
-.link {
-  color: var(--blue-light);
-  text-decoration: none;
-  border-bottom: 1px solid rgba(77, 163, 255, 0.35);
-  transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+/* ── 通常の引用（マーカー無し blockquote） ── */
+.quote {
+  margin: 26px 0;
+  padding: 4px 22px;
+  border-left: 4px solid #c7d2e0;
+  color: var(--ink-sub);
+  font-style: italic;
 }
-.link:hover {
-  color: var(--blue-pale);
-  border-bottom-color: var(--blue-pale);
-}
-
-/* 引用 */
-.prose blockquote {
-  margin: 24px 0;
-  padding: 4px 20px;
-  border-left: 3px solid var(--blue);
-  background: rgba(46, 107, 255, 0.06);
-  border-radius: 0 var(--r-sm) var(--r-sm) 0;
-  color: var(--text-strong);
-}
-.prose blockquote p {
+.quote :global(p) {
   margin: 12px 0;
 }
 
-/* インラインコード / コードブロック */
-.prose code {
+/* ── ボックス（callout）共通 ── */
+.callout {
+  margin: 28px 0;
+  padding: 20px 24px 20px 52px;
+  position: relative;
+  border-radius: 12px;
+  font-size: 16px;
+  line-height: 1.85;
+}
+.callout :global(p) {
+  margin: 8px 0;
+}
+.callout :global(p):first-child {
+  margin-top: 0;
+}
+.callout :global(p):last-child {
+  margin-bottom: 0;
+}
+.callout::before {
+  position: absolute;
+  left: 18px;
+  top: 18px;
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* ポイント（青系） */
+.point {
+  background: #eef3ff;
+  border: 1px solid #d3e0ff;
+}
+.point::before {
+  content: '💡';
+}
+
+/* 注意（橙系） */
+.warn {
+  background: #fff3ec;
+  border: 1px solid #ffd6bf;
+}
+.warn::before {
+  content: '⚠️';
+}
+
+/* 冒頭「この記事でわかること」枠 */
+.tocBox {
+  padding: 24px 26px;
+  background: linear-gradient(135deg, #f0f5ff, #ffffff);
+  border: 1px solid #d3e0ff;
+  border-left: 5px solid var(--brand);
+}
+.tocBox::before {
+  content: none;
+}
+.tocBox :global(ul) {
+  margin: 6px 0 0;
+}
+.tocBox :global(li) {
+  margin: 8px 0;
+}
+.tocBox :global(strong) {
+  background: none;
+  font-size: 15.5px;
+  letter-spacing: 0.02em;
+  color: var(--brand);
+}
+
+/* ── コード ── */
+.prose :global(code) {
   font-family: var(--font-grotesk), monospace;
   font-size: 0.9em;
   padding: 0.15em 0.45em;
   border-radius: 5px;
-  background: rgba(77, 163, 255, 0.12);
-  color: var(--blue-pale);
+  background: #eef1f6;
+  color: #b3325a;
 }
-.prose pre {
-  margin: 24px 0;
+.prose :global(pre) {
+  margin: 26px 0;
   padding: 18px 20px;
   overflow-x: auto;
-  background: var(--bg-darkest);
-  border: 1px solid rgba(77, 163, 255, 0.16);
-  border-radius: var(--r-lg);
+  background: #0e1a2e;
+  border-radius: 12px;
 }
-.prose pre code {
+.prose :global(pre) :global(code) {
   padding: 0;
   background: none;
-  color: var(--text-strong);
+  color: #d7e3f7;
 }
 
-/* 区切り線 */
-.prose hr {
-  margin: 40px 0;
+/* ── 区切り線 ── */
+.prose :global(hr) {
+  margin: 44px 0;
   border: none;
-  border-top: 1px solid rgba(77, 163, 255, 0.16);
+  border-top: 1px solid var(--line);
 }
 
-/* 表（GFM） */
-.prose table {
+/* ── 表（GFM）：白背景・ヘッダー色付き・モバイル横スクロール ── */
+.tableWrap {
+  margin: 26px 0;
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+.tableWrap table {
   width: 100%;
-  margin: 24px 0;
   border-collapse: collapse;
-  font-size: 14.5px;
+  font-size: 15px;
 }
-.prose th,
-.prose td {
-  padding: 10px 14px;
-  border: 1px solid rgba(77, 163, 255, 0.16);
+.tableWrap th,
+.tableWrap td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
   text-align: left;
+  vertical-align: top;
 }
-.prose th {
-  background: rgba(46, 107, 255, 0.1);
-  color: var(--text);
+.tableWrap th:last-child,
+.tableWrap td:last-child {
+  border-right: none;
+}
+.tableWrap tbody tr:last-child td {
+  border-bottom: none;
+}
+.tableWrap th {
+  background: #eef3ff;
+  color: var(--ink-strong);
   font-weight: 700;
+  white-space: nowrap;
+}
+.tableWrap tr:nth-child(even) td {
+  background: #fafbfd;
 }
 
-/* 画像 */
-.prose img {
-  margin: 24px auto;
-  border-radius: var(--r-card);
-  border: 1px solid rgba(77, 163, 255, 0.16);
+/* ── 画像 ── */
+.prose :global(img) {
+  margin: 26px auto;
+  border-radius: 12px;
+  border: 1px solid var(--line);
 }
 
 @media (max-width: 768px) {
   .prose {
-    font-size: 15.5px;
+    font-size: 16px;
+    line-height: 1.85;
   }
-  .prose h2 {
+  .prose :global(h2) {
     font-size: 21px;
-    margin: 44px 0 16px;
+    margin: 48px 0 18px;
   }
-  .prose h3 {
-    font-size: 17.5px;
+  .prose :global(h3) {
+    font-size: 18px;
+  }
+  .callout {
+    padding: 18px 18px 18px 46px;
+  }
+  .tocBox {
+    padding: 20px;
   }
 }

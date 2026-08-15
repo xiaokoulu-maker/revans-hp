@@ -8,10 +8,12 @@ type Props = {
   en: string;
   title: string;
   lead?: string;
+  /** 見出し下に置くメタ情報（公開日・更新日・読了時間など）。任意 */
+  meta?: React.ReactNode;
 };
 
 /** 下層ページ共通のヒーロー帯（パンくず＋eyebrow＋見出し＋リード） */
-export default function PageHero({ crumbs, en, title, lead }: Props) {
+export default function PageHero({ crumbs, en, title, lead, meta }: Props) {
   return (
     <section className={styles.hero}>
       <div className={styles.grid} aria-hidden />
@@ -34,6 +36,7 @@ export default function PageHero({ crumbs, en, title, lead }: Props) {
         <span className={`${styles.en} font-en`}>{en}</span>
         <h1 className={styles.title}>{title}</h1>
         {lead && <p className={`${styles.lead} pretty`}>{lead}</p>}
+        {meta && <div className={styles.meta}>{meta}</div>}
       </div>
     </section>
   );
