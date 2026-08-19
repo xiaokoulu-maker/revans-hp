@@ -79,6 +79,8 @@ export interface BlogPostSummary {
   excerpt: string;
   publishedAt: string;
   category?: string;
+  /** アイキャッチ画像 URL（DB: eyecatch_url）。無ければカードは画像なし表示 */
+  coverImage?: string;
   /** 読了時間（分）。本文文字数から算出（一覧・関連カードの表示用） */
   readingMinutes?: number;
 }

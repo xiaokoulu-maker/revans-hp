@@ -55,6 +55,7 @@ function toSummary(p: BlogPost): BlogPostSummary {
     excerpt: p.excerpt,
     publishedAt: p.publishedAt,
     category: p.category,
+    coverImage: p.coverImage,
     readingMinutes: readingMinutes(p.body),
   };
 }

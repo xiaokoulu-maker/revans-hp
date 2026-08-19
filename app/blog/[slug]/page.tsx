@@ -1,13 +1,11 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import Reveal from '@/components/Reveal';
-import SectionLabel from '@/components/ui/SectionLabel';
-import PageHero from '@/components/layout/PageHero';
+import { SubpageFrame, SubpageCTA } from '../../site-chrome';
 import ArticleCta from '@/components/blog/ArticleCta';
 import ArticleBody from '@/components/blog/ArticleBody';
 import TableOfContents from '@/components/blog/TableOfContents';
 import Faq from '@/components/blog/Faq';
-import BlogCard from '@/components/blog/BlogCard';
 import JsonLd from '@/components/blog/JsonLd';
 import {
   getPostBySlug,
@@ -121,48 +119,54 @@ export default async function BlogPostPage({
       : null;
 
   return (
-    <>
+    <SubpageFrame active="/blog">
       <JsonLd data={articleLd} />
       <JsonLd data={breadcrumbLd} />
       {faqLd && <JsonLd data={faqLd} />}
 
-      <PageHero
-        crumbs={[
-          { label: 'ホーム', href: '/' },
-          { label: 'コラム', href: '/blog' },
-          { label: post.title },
-        ]}
-        en={post.category ?? 'COLUMN'}
-        title={post.title}
-        lead={post.summary ?? post.excerpt}
-        meta={
-          <>
-            <span className="metaItem">
-              <span className="font-en">公開</span>
+      {/* 記事ヒーロー（新デザイン・白基調） */}
+      <section className="article-hero">
+        <div className="sub-hero-grid" aria-hidden="true" />
+        <div className="shell article-hero-inner">
+          <nav className="article-crumbs" aria-label="パンくず">
+            <Link href="/">ホーム</Link>
+            <span>/</span>
+            <Link href="/blog">コラム</Link>
+            <span>/</span>
+            <span className="article-crumbs-current">{post.title}</span>
+          </nav>
+          <p className="eyebrow"><span /> {post.category ?? 'COLUMN'}</p>
+          <h1>{post.title}</h1>
+          <div className="article-meta">
+            <span>
+              <small className="font-en">公開</small>
               <time dateTime={post.publishedAt}>{formatPostDate(post.publishedAt)}</time>
             </span>
             {showUpdated && (
-              <span className="metaItem">
-                <span className="font-en">更新</span>
+              <span>
+                <small className="font-en">更新</small>
                 <time dateTime={post.updatedAt}>{formatPostDate(post.updatedAt!)}</time>
               </span>
             )}
-            <span className="metaItem">約{readMin}分で読めます</span>
-          </>
-        }
-      />
+            <span>約{readMin}分で読めます</span>
+          </div>
+        </div>
+      </section>
 
       <section className={styles.sec}>
         <div className={styles.layout}>
           <article className={styles.article}>
-            {/* 目次：PC・モバイル共通で本文冒頭（最初の H2 の前）に配置 */}
+            {/* 目次：本文冒頭（最初の H2 の前）に配置 */}
             {headings.length > 0 && <TableOfContents headings={headings} />}
 
             <ArticleBody body={post.body} ctaBeforeId={ctaBeforeId} />
 
             {post.faq && post.faq.length > 0 && (
               <div className={styles.faqBlock}>
-                <SectionLabel en="FAQ" title="よくある質問" titleSize={26} />
+                <div className="article-section-head">
+                  <p className="eyebrow"><span /> FAQ</p>
+                  <h2>よくある質問</h2>
+                </div>
                 <div className={styles.faqInner}>
                   <Faq items={post.faq} />
                 </div>
@@ -177,19 +181,28 @@ export default async function BlogPostPage({
       {related.length > 0 && (
         <section className={styles.related}>
           <div className={styles.relatedInner}>
-            <Reveal>
-              <SectionLabel en="RELATED" title="関連記事" />
-            </Reveal>
+            <div className="article-section-head" data-reveal="up">
+              <p className="eyebrow"><span /> RELATED</p>
+              <h2>関連記事</h2>
+            </div>
             <div className={styles.relatedGrid}>
-              {related.map((r, i) => (
-                <Reveal key={r.slug} index={i}>
-                  <BlogCard post={r} variant="light" />
-                </Reveal>
+              {related.map((r) => (
+                <Link className="related-card" href={`/blog/${r.slug}`} key={r.slug}>
+                  <small className="font-en">{r.category ?? 'COLUMN'}</small>
+                  <h3>{r.title}</h3>
+                  <p>{r.excerpt}</p>
+                  <b>
+                    {formatPostDate(r.publishedAt)}
+                    {r.readingMinutes ? ` ・ 約${r.readingMinutes}分` : ''} READ ↓
+                  </b>
+                </Link>
               ))}
             </div>
           </div>
         </section>
       )}
-    </>
+
+      <SubpageCTA title="この記事に関連する相談も、お気軽にどうぞ。" />
+    </SubpageFrame>
   );
 }
