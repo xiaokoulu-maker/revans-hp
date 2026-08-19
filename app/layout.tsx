@@ -1,25 +1,10 @@
 import type { Metadata, Viewport } from 'next';
-import { Noto_Sans_JP, Space_Grotesk } from 'next/font/google';
 import { SITE } from '@/lib/site';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
-import MobileCta from '@/components/layout/MobileCta';
 import './globals.css';
 
-const noto = Noto_Sans_JP({
-  subsets: ['latin'],
-  weight: ['400', '500', '700', '900'],
-  variable: '--font-noto',
-  display: 'swap',
-  preload: false, // 和文は字数が多く preload に不向き
-});
-
-const grotesk = Space_Grotesk({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-grotesk',
-  display: 'swap',
-});
+// 参照元デザインに合わせ、フォントは外部読み込みせずシステムフォントスタックを使用
+// （font-family は globals.css の body で指定）。ヘッダー/フッターは各ページが
+// site-chrome から描画するため、ここではグローバルに配置しない。
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -43,7 +28,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#0A1220',
+  themeColor: '#08162c',
 };
 
 export default function RootLayout({
@@ -52,13 +37,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ja" className={`${noto.variable} ${grotesk.variable}`}>
-      <body>
-        <Header />
-        <main>{children}</main>
-        <Footer />
-        <MobileCta />
-      </body>
+    <html lang="ja">
+      <body className="antialiased">{children}</body>
     </html>
   );
 }
