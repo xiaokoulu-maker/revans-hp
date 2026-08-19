@@ -1,12 +1,8 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import Reveal from '@/components/Reveal';
-import SectionLabel from '@/components/ui/SectionLabel';
-import PageHero from '@/components/layout/PageHero';
-import CtaBand from '@/components/CtaBand';
-import ServiceCard from '@/components/service/ServiceCard';
-import { serviceDetails, getServiceDetail, getServiceSummary } from '@/lib/data';
-import styles from './page.module.css';
+import { ArrowIcon, PageIntro, SubpageCTA, SubpageFrame } from '../../site-chrome';
+import { services, serviceDetails, getServiceDetail, getServiceSummary } from '@/lib/data';
 
 // 6件を静的生成
 export function generateStaticParams() {
@@ -40,96 +36,88 @@ export default async function ServiceDetailPage({
   const d = getServiceDetail(slug);
   if (!d) notFound();
 
-  const related = d.related.map((slug) => getServiceSummary(slug));
+  const index = services.find((s) => s.slug === d.slug)?.no ?? '01';
+  const related = d.related.map((s) => getServiceSummary(s));
 
   return (
-    <>
-      <PageHero
-        crumbs={[
-          { label: 'ホーム', href: '/' },
-          { label: '事業内容', href: '/services' },
-          { label: d.title },
-        ]}
-        en={d.en}
+    <SubpageFrame active="/services">
+      <PageIntro
+        index={index}
+        label={d.en}
+        accent="CAPABILITIES"
         title={d.title}
-        lead={d.description}
+        description={d.description}
       />
 
       {/* ISSUES */}
-      <section className={`${styles.sec} ${styles.alt}`}>
-        <div className={styles.inner}>
-          <Reveal>
-            <SectionLabel en="ISSUES" title="こんなお悩みはありませんか？" />
-          </Reveal>
-          <div className={styles.g3}>
+      <section className="content-section">
+        <div className="shell">
+          <div className="sub-section-head" data-reveal="up"><span>ISSUES</span><div><p>こんなお悩みはありませんか？</p><h2>その課題、<br />設計から見直せます。</h2></div></div>
+          <div className="model-grid" data-reveal="up">
             {d.issues.map((it, i) => (
-              <Reveal key={it.title} index={i} className={styles.issue}>
-                <strong className={styles.issueTitle}>{it.title}</strong>
-                <span className={styles.issueBody}>{it.body}</span>
-              </Reveal>
+              <article key={it.title}>
+                <span>0{i + 1}</span>
+                <small>ISSUE</small>
+                <h3>{it.title}</h3>
+                <p>{it.body}</p>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
       {/* WHAT WE DO */}
-      <section className={styles.sec}>
-        <div className={styles.inner}>
-          <Reveal>
-            <SectionLabel en="WHAT WE DO" title="REVANSが提供すること" />
-          </Reveal>
-          <div className={styles.g2}>
-            {d.features.map((f, i) => (
-              <Reveal key={f.no} index={i} className={styles.feature}>
-                <span className={`${styles.num} font-en`}>{f.no}</span>
-                <div>
-                  <h3 className={styles.featTitle}>{f.title}</h3>
-                  <p className={styles.featBody}>{f.body}</p>
-                </div>
-              </Reveal>
+      <section className="content-section journal-index-section">
+        <div className="shell">
+          <div className="sub-section-head" data-reveal="up"><span>WHAT WE DO</span><div><p>REVANSが提供すること</p><h2>成果から逆算した、<br />4つの打ち手。</h2></div></div>
+          <div className="value-grid" data-reveal="up">
+            {d.features.map((f) => (
+              <article key={f.no}>
+                <div><span>{f.no}</span><small>SERVICE</small></div>
+                <h3>{f.title}</h3>
+                <p>{f.body}</p>
+                <b aria-hidden="true">R</b>
+              </article>
             ))}
           </div>
         </div>
       </section>
 
       {/* FLOW */}
-      <section className={`${styles.sec} ${styles.alt}`}>
-        <div className={styles.inner}>
-          <Reveal>
-            <SectionLabel en="FLOW" title="進め方" />
-          </Reveal>
-          <div className={styles.steps}>
+      <section className="content-section">
+        <div className="shell">
+          <div className="sub-section-head" data-reveal="up"><span>FLOW</span><div><p>進め方</p><h2>相談から運用まで、<br />迷わない進め方。</h2></div></div>
+          <div className="sub-step-grid" data-reveal="up">
             {d.flow.map((s, i) => (
-              <Reveal key={s.title} index={i} className={styles.step}>
-                <span className={`${styles.stepNo} font-en`}>{String(i + 1).padStart(2, '0')}</span>
-                <div>
-                  <strong className={styles.stepTitle}>{s.title}</strong>
-                  <span className={styles.stepBody}>{s.body}</span>
-                </div>
-              </Reveal>
+              <article key={s.title}>
+                <div><b>{String(i + 1).padStart(2, '0')}</b><small>STEP</small></div>
+                <h3>{s.title}</h3>
+                <p>{s.body}</p>
+              </article>
             ))}
           </div>
-          <p className={styles.note}>{d.note}</p>
+          <p className="model-note">{d.note}</p>
         </div>
       </section>
 
-      <CtaBand />
+      <SubpageCTA title="何から始めるべきか、そこから一緒に整理します。" />
 
       {/* OTHER SERVICES */}
-      <section className={styles.sec}>
-        <div className={styles.inner}>
-          <Reveal>
-            <SectionLabel en="OTHER SERVICES" title="あわせて検討されるサービス" />
-          </Reveal>
-          <div className={styles.g3}>
-            {related.map((r, i) => (
-              <Reveal key={r.slug} index={i}>
-                <ServiceCard item={r} />
-              </Reveal>
+      <section className="content-section">
+        <div className="shell">
+          <div className="sub-section-head" data-reveal="up"><span>OTHER SERVICES</span><div><p>あわせて検討されるサービス</p><h2>組み合わせて、<br />効果を最大化する。</h2></div></div>
+          <div className="related-grid-3" data-reveal="up">
+            {related.map((r) => (
+              <Link className="related-card" href={`/services/${r.slug}`} key={r.slug}>
+                <small className="font-en">{r.en}</small>
+                <h3>{r.title}</h3>
+                <p>{r.body}</p>
+                <b>サービス詳細 <ArrowIcon /></b>
+              </Link>
             ))}
           </div>
         </div>
       </section>
-    </>
+    </SubpageFrame>
   );
 }
