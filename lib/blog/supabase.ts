@@ -44,13 +44,26 @@ export interface BlogPostRow {
   faq: unknown;
   summary: string | null;
   cta_text: string | null;
+  category?: string | null;
   created_at: string;
   updated_at: string | null;
 }
 
-/** 取得に使うカラム列（select 指定を1箇所に集約） */
-export const POST_COLUMNS =
+/**
+ * 取得に使うカラム列（select 指定を1箇所に集約）。
+ * category は追加マイグレーション（0002）で入る任意列。未適用環境でも公開側が
+ * 落ちないよう、BASE（category 抜き）と FULL（category 付き）を用意し、
+ * データ取得層で FULL→BASE のフォールバックを行う。
+ */
+export const POST_COLUMNS_BASE =
   'slug, title, body, excerpt, eyecatch_url, status, published_at, seo_title, meta_description, target_keywords, faq, summary, cta_text, created_at, updated_at';
+export const POST_COLUMNS = `${POST_COLUMNS_BASE}, category`;
+
+/** PostgREST の「列が存在しない」エラー（未適用マイグレーション）判定 */
+export function isUndefinedColumnError(error: { code?: string; message?: string } | null): boolean {
+  if (!error) return false;
+  return error.code === '42703' || /column .*category.* does not exist/i.test(error.message ?? '');
+}
 
 const emptyToUndef = (v: string | null | undefined): string | undefined =>
   v && v.trim() !== '' ? v : undefined;
@@ -94,7 +107,9 @@ export function mapRow(row: BlogPostRow): BlogPost {
     summary: emptyToUndef(row.summary),
     ctaText: emptyToUndef(row.cta_text),
     coverImage: row.eyecatch_url ?? undefined,
-    category: undefined,
+    // category は 0002 マイグレーション適用後のみ値が入る。未適用時は undefined で
+    // 従来どおり UI 側フォールバック（'COLUMN'）になる。
+    category: emptyToUndef(row.category),
     author: undefined,
     relatedSlugs: undefined,
   };
@@ -175,6 +190,37 @@ export async function getBlogSettings(): Promise<BlogSettingsValues> {
     postsPerPage: Number((data as { posts_per_page?: unknown }).posts_per_page) || 9,
     defaultAuthor: String((data as { default_author?: unknown }).default_author ?? ''),
   };
+}
+
+/**
+ * blog_settings（単一行）を更新する。存在しなければ1行 insert する。
+ * 管理画面の設定保存から呼ぶ（service_role 経由）。更新後の値を返す。
+ */
+export async function updateBlogSettings(
+  patch: Partial<BlogSettingsValues>,
+): Promise<BlogSettingsValues> {
+  const supabase = getServiceSupabase();
+  if (!supabase) return { ...DEFAULT_SETTINGS, ...patch };
+
+  const payload: Record<string, unknown> = {};
+  if (patch.autoPublish !== undefined) payload.auto_publish = patch.autoPublish;
+  if (patch.defaultAuthor !== undefined) payload.default_author = patch.defaultAuthor;
+  if (patch.postsPerPage !== undefined) payload.posts_per_page = patch.postsPerPage;
+
+  const { data: existing } = await supabase.from('blog_settings').select('id').limit(1).maybeSingle();
+
+  if (existing && (existing as { id?: string }).id) {
+    const { error } = await supabase
+      .from('blog_settings')
+      .update(payload)
+      .eq('id', (existing as { id: string }).id);
+    if (error) console.error('[blog] updateBlogSettings update failed:', error.message);
+  } else {
+    const { error } = await supabase.from('blog_settings').insert(payload);
+    if (error) console.error('[blog] updateBlogSettings insert failed:', error.message);
+  }
+
+  return getBlogSettings();
 }
 
 /** blog_posts の全 slug（下書き含む・全 status）。テーマ重複回避と slug 一意化に使う。 */
