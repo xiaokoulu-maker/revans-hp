@@ -5,7 +5,14 @@ import type {
   PaginatedPosts,
   PostHeading,
 } from './types';
-import { getSupabase, mapRow, POST_COLUMNS, type BlogPostRow } from './supabase';
+import {
+  getSupabase,
+  mapRow,
+  POST_COLUMNS,
+  POST_COLUMNS_BASE,
+  isUndefinedColumnError,
+  type BlogPostRow,
+} from './supabase';
 
 // ─────────────────────────────────────────────────────────────
 // ブログ データ取得層（唯一の“供給元”）。
@@ -30,17 +37,30 @@ async function loadPublishedPosts(): Promise<BlogPost[]> {
   if (!supabase) return [];
 
   try {
-    const { data, error } = await supabase
+    const first = await supabase
       .from('blog_posts')
       .select(POST_COLUMNS)
       .eq('status', 'published')
       .order('published_at', { ascending: false });
+    let data = first.data as BlogPostRow[] | null;
+    let error = first.error as { code?: string; message?: string } | null;
+
+    // category 列が未適用（0002 未実行）の環境では列を外して再取得する
+    if (error && isUndefinedColumnError(error)) {
+      const retry = await supabase
+        .from('blog_posts')
+        .select(POST_COLUMNS_BASE)
+        .eq('status', 'published')
+        .order('published_at', { ascending: false });
+      data = retry.data as BlogPostRow[] | null;
+      error = retry.error as { code?: string; message?: string } | null;
+    }
 
     if (error) {
       console.error('[blog] failed to load posts:', error.message);
       return [];
     }
-    return ((data as BlogPostRow[]) ?? []).map(mapRow);
+    return (data ?? []).map(mapRow);
   } catch (e) {
     console.error('[blog] unexpected error loading posts:', e);
     return [];
@@ -122,18 +142,32 @@ export async function getPostBySlug(slug: string): Promise<BlogPost | undefined>
   if (!supabase) return undefined;
 
   try {
-    const { data, error } = await supabase
+    const first = await supabase
       .from('blog_posts')
       .select(POST_COLUMNS)
       .eq('slug', slug)
       .eq('status', 'published')
       .maybeSingle();
+    let data = first.data as BlogPostRow | null;
+    let error = first.error as { code?: string; message?: string } | null;
+
+    // category 列が未適用（0002 未実行）の環境では列を外して再取得する
+    if (error && isUndefinedColumnError(error)) {
+      const retry = await supabase
+        .from('blog_posts')
+        .select(POST_COLUMNS_BASE)
+        .eq('slug', slug)
+        .eq('status', 'published')
+        .maybeSingle();
+      data = retry.data as BlogPostRow | null;
+      error = retry.error as { code?: string; message?: string } | null;
+    }
 
     if (error) {
       console.error('[blog] failed to load post:', error.message);
       return undefined;
     }
-    return data ? mapRow(data as BlogPostRow) : undefined;
+    return data ? mapRow(data) : undefined;
   } catch (e) {
     console.error('[blog] unexpected error loading post:', e);
     return undefined;
