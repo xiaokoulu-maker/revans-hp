@@ -42,6 +42,7 @@ export default function AdminSettingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           autoPublish: settings.autoPublish,
+          autoFix: settings.autoFix,
           defaultAuthor: settings.defaultAuthor,
           postsPerPage: settings.postsPerPage,
         }),
@@ -100,6 +101,20 @@ export default function AdminSettingsPage() {
             />
             <span style={{ fontSize: 13 }}>
               ONにすると、週次生成で安全チェックを通過した記事を自動公開します（要確認は下書きのまま）。
+            </span>
+          </label>
+        </div>
+
+        <div className={styles.field}>
+          <label className={styles.label}>要確認記事の自動修正（auto_fix）</label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={settings.autoFix}
+              onChange={(e) => set('autoFix', e.target.checked)}
+            />
+            <span style={{ fontSize: 13 }}>
+              ONにすると、週次生成で「要確認（[要確認]マーカー・金額表現）」と判定された記事を、公開前にAIが自動修正して公開まで完結させます（自動公開がONのときのみ動作）。OFFにすると従来どおり下書きのまま承認待ちになります。
             </span>
           </label>
         </div>

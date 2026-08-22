@@ -161,40 +161,74 @@ export interface BlogSettingsValues {
   autoPublish: boolean;
   postsPerPage: number;
   defaultAuthor: string;
+  /**
+   * 自動修正（要確認記事を公開前に AI で修正）の有効フラグ。
+   * DB では blog_settings.auto_fix（0004 マイグレーションで追加）。既定は ON。
+   * 列が未適用の環境でも壊れないよう、読み取り時は列が無ければ true 扱いにする。
+   */
+  autoFix: boolean;
 }
 
 const DEFAULT_SETTINGS: BlogSettingsValues = {
   autoPublish: false,
   postsPerPage: 9,
   defaultAuthor: '',
+  autoFix: true,
 };
+
+/** PostgREST の「指定した列が存在しない」エラー（未適用マイグレーション）判定 */
+function isMissingColumn(error: { code?: string; message?: string } | null, column: string): boolean {
+  if (!error) return false;
+  return (
+    error.code === '42703' ||
+    new RegExp(`column .*${column}.* does not exist`, 'i').test(error.message ?? '')
+  );
+}
 
 /**
  * blog_settings を1行取得する。行が無い／接続不可なら autoPublish=false の既定を返す。
  * 「行が無ければ非公開扱い」で、意図せぬ自動公開を防ぐ。
+ * auto_fix 列が未適用の環境では autoFix=true（既定 ON）にフォールバックする。
  */
 export async function getBlogSettings(): Promise<BlogSettingsValues> {
   const supabase = getServiceSupabase();
   if (!supabase) return DEFAULT_SETTINGS;
 
-  const { data, error } = await supabase
+  // auto_fix 列付きで取得を試み、列が無ければ base 列で取り直す。
+  const withFix = await supabase
     .from('blog_settings')
-    .select('auto_publish, posts_per_page, default_author')
+    .select('auto_publish, posts_per_page, default_author, auto_fix')
     .limit(1)
     .maybeSingle();
+
+  let data = withFix.data as Record<string, unknown> | null;
+  let error = withFix.error as { code?: string; message?: string } | null;
+
+  if (error && isMissingColumn(error, 'auto_fix')) {
+    const base = await supabase
+      .from('blog_settings')
+      .select('auto_publish, posts_per_page, default_author')
+      .limit(1)
+      .maybeSingle();
+    data = base.data as Record<string, unknown> | null;
+    error = base.error as { code?: string; message?: string } | null;
+  }
 
   if (error || !data) return DEFAULT_SETTINGS;
 
   return {
-    autoPublish: Boolean((data as { auto_publish?: unknown }).auto_publish),
-    postsPerPage: Number((data as { posts_per_page?: unknown }).posts_per_page) || 9,
-    defaultAuthor: String((data as { default_author?: unknown }).default_author ?? ''),
+    autoPublish: Boolean(data.auto_publish),
+    postsPerPage: Number(data.posts_per_page) || 9,
+    defaultAuthor: String(data.default_author ?? ''),
+    // 列が無い（undefined）＝未適用環境 → 既定 ON。存在すれば値を尊重。
+    autoFix: data.auto_fix === undefined ? true : Boolean(data.auto_fix),
   };
 }
 
 /**
  * blog_settings（単一行）を更新する。存在しなければ1行 insert する。
  * 管理画面の設定保存から呼ぶ（service_role 経由）。更新後の値を返す。
+ * auto_fix 列が未適用の環境では、その列を落として他の設定だけ保存する。
  */
 export async function updateBlogSettings(
   patch: Partial<BlogSettingsValues>,
@@ -206,19 +240,26 @@ export async function updateBlogSettings(
   if (patch.autoPublish !== undefined) payload.auto_publish = patch.autoPublish;
   if (patch.defaultAuthor !== undefined) payload.default_author = patch.defaultAuthor;
   if (patch.postsPerPage !== undefined) payload.posts_per_page = patch.postsPerPage;
+  if (patch.autoFix !== undefined) payload.auto_fix = patch.autoFix;
 
   const { data: existing } = await supabase.from('blog_settings').select('id').limit(1).maybeSingle();
+  const existingId = (existing as { id?: string } | null)?.id;
 
-  if (existing && (existing as { id?: string }).id) {
-    const { error } = await supabase
-      .from('blog_settings')
-      .update(payload)
-      .eq('id', (existing as { id: string }).id);
-    if (error) console.error('[blog] updateBlogSettings update failed:', error.message);
-  } else {
-    const { error } = await supabase.from('blog_settings').insert(payload);
-    if (error) console.error('[blog] updateBlogSettings insert failed:', error.message);
+  // auto_fix 列が無い環境では 42703 になる。その場合 auto_fix を落として再試行する。
+  const run = async (body: Record<string, unknown>) => {
+    if (existingId) {
+      return supabase.from('blog_settings').update(body).eq('id', existingId);
+    }
+    return supabase.from('blog_settings').insert(body);
+  };
+
+  let { error } = await run(payload);
+  if (error && isMissingColumn(error, 'auto_fix') && 'auto_fix' in payload) {
+    const { auto_fix: _omit, ...rest } = payload;
+    void _omit;
+    ({ error } = await run(rest));
   }
+  if (error) console.error('[blog] updateBlogSettings failed:', error.message);
 
   return getBlogSettings();
 }
@@ -326,6 +367,55 @@ export async function updatePostStatus(
 
   if (error) {
     console.error('[blog] updatePostStatus failed:', error.message);
+    return false;
+  }
+  return true;
+}
+
+/** 自動修正後の内容更新に使うフィールド（camelCase）。 */
+export interface PublishContentInput {
+  title: string;
+  body: string;
+  excerpt: string;
+  seoTitle: string;
+  metaDescription: string;
+  faq: FaqItem[];
+  summary: string;
+  ctaText: string;
+}
+
+/**
+ * 自動修正済みの内容で本文などを差し替え、同時に published へ更新する（needs_review 解除）。
+ * cron の自動修正パスからのみ呼ぶ（service_role 経由）。成否を boolean で返す。
+ * slug / target_keywords / headings は変更しない（構造・URL を維持）。
+ */
+export async function updatePostContentAndPublish(
+  id: string,
+  content: PublishContentInput,
+  publishedAt: string,
+): Promise<boolean> {
+  const supabase = getServiceSupabase();
+  if (!supabase) return false;
+
+  const { error } = await supabase
+    .from('blog_posts')
+    .update({
+      title: content.title,
+      body: content.body,
+      excerpt: content.excerpt,
+      seo_title: content.seoTitle,
+      meta_description: content.metaDescription,
+      faq: content.faq,
+      summary: content.summary,
+      cta_text: content.ctaText,
+      status: 'published',
+      published_at: publishedAt,
+      needs_review: false,
+    })
+    .eq('id', id);
+
+  if (error) {
+    console.error('[blog] updatePostContentAndPublish failed:', error.message);
     return false;
   }
   return true;

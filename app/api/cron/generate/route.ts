@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateArticle } from '@/lib/blog/generate-article';
 import { composeArticleBody } from '@/lib/blog/generate-prompt';
+import { autoFixArticle, type AutoFixOutcome } from '@/lib/blog/auto-fix';
 import { pickTopic, toGenerateInputFromTopic } from '@/lib/blog/topic-queue';
 import {
   listAllSlugs,
   getBlogSettings,
   createDraftPost,
   updatePostStatus,
+  updatePostContentAndPublish,
 } from '@/lib/blog/supabase';
 
 /**
@@ -114,22 +116,66 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  // e. 自動公開判定: auto_publish が ON かつ安全チェックを通過した場合のみ公開
+  // e. 公開判定
+  //   ・auto_publish OFF          → draft 据え置き（現状どおり）
+  //   ・needsReview=false         → そのまま published
+  //   ・needsReview=true          → auto_fix ON かつ実生成なら AI 修正を試み、
+  //                                 通れば修正内容で published。ダメなら draft 据え置き。
   const settings = await getBlogSettings();
-  const shouldPublish = settings.autoPublish && !needsReview;
 
   let published = false;
+  let finalStatus: 'published' | 'draft' = 'draft';
   let reason: string;
+  let autoFix: ReturnType<typeof summarizeAutoFix> | null = null;
+  const publishedAt = new Date().toISOString();
 
-  if (shouldPublish) {
-    published = await updatePostStatus(created.id, 'published', new Date().toISOString());
+  if (!settings.autoPublish) {
+    reason = '自動公開設定がOFFのため、下書きとして保存しました。';
+  } else if (!needsReview) {
+    published = await updatePostStatus(created.id, 'published', publishedAt);
+    finalStatus = published ? 'published' : 'draft';
     reason = published
       ? '自動公開設定がONで、安全チェックも通過したため公開しました。'
       : '公開への更新に失敗したため下書きのままです。';
-  } else if (!settings.autoPublish) {
-    reason = '自動公開設定がOFFのため、下書きとして保存しました。';
+  } else if (settings.autoFix && !result.stub) {
+    // 要確認記事の自動修正パス（公開まで完結させる）。
+    const outcome = await autoFixArticle(
+      article,
+      { needsReview: true, reasons: result.reasons ?? [], notes: [] },
+    );
+    autoFix = summarizeAutoFix(outcome);
+
+    if (outcome.fixed) {
+      const fixedBody = composeArticleBody(outcome.article);
+      const fixedExcerpt = (outcome.article.metaDescription || outcome.article.intro || '').trim();
+      published = await updatePostContentAndPublish(
+        created.id,
+        {
+          title: outcome.article.title,
+          body: fixedBody,
+          excerpt: fixedExcerpt,
+          seoTitle: outcome.article.seoTitle,
+          metaDescription: outcome.article.metaDescription,
+          faq: outcome.article.faq,
+          summary: outcome.article.summary,
+          ctaText: outcome.article.ctaText,
+        },
+        publishedAt,
+      );
+      finalStatus = published ? 'published' : 'draft';
+      reason = published
+        ? `要確認と判定されましたが、AIが自動修正し公開しました（試行${outcome.attempts}回・検出: ${describeDetected(outcome)}）。`
+        : '自動修正は成功しましたが、公開への更新に失敗したため下書きのままです。';
+    } else {
+      reason = outcome.error
+        ? `AI修正の呼び出しに失敗したため、下書きのままにしました（${outcome.error}）。`
+        : `AI修正を${outcome.attempts}回試みましたが安全チェックを通らず、下書きのままにしました（残: ${outcome.finalReasons.join(' / ') || '理由不明'}）。`;
+    }
   } else {
-    reason = `安全チェックで確認が必要と判定されたため、下書きのままにしました（${(result.reasons ?? []).join(' / ') || '理由不明'}）。`;
+    // auto_fix OFF、またはスタブ記事 → 現状どおり draft 据え置き。
+    reason = result.stub
+      ? 'APIキー未設定のスタブ記事のため、自動修正はスキップし下書きとして保存しました。'
+      : `安全チェックで確認が必要と判定されたため、下書きのままにしました（${(result.reasons ?? []).join(' / ') || '理由不明'}）。`;
   }
 
   return NextResponse.json({
@@ -140,11 +186,34 @@ export async function GET(request: NextRequest) {
     title: created.title,
     slug: created.slug,
     charCount: body.length,
-    status: published ? 'published' : 'draft',
+    status: finalStatus,
     published,
     needsReview,
+    autoFix,
     reason,
     reasons: result.reasons ?? [],
     usage: result.usage ?? null,
   });
+}
+
+/** cron レスポンス／ログ用に AutoFixOutcome を要約する。 */
+function summarizeAutoFix(outcome: AutoFixOutcome) {
+  return {
+    attempted: outcome.attempted,
+    fixed: outcome.fixed,
+    attempts: outcome.attempts,
+    detected: describeDetected(outcome),
+    initialReasons: outcome.initialReasons,
+    finalReasons: outcome.finalReasons,
+    totalCostUsd: outcome.totalCostUsd,
+    usages: outcome.usages,
+    error: outcome.error ?? null,
+  };
+}
+
+function describeDetected(outcome: AutoFixOutcome): string {
+  const parts: string[] = [];
+  if (outcome.detected.marker) parts.push('[要確認]');
+  if (outcome.detected.price) parts.push('金額表現');
+  return parts.length ? parts.join('・') : '不明';
 }

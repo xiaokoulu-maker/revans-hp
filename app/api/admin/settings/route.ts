@@ -26,6 +26,7 @@ export async function PUT(request: NextRequest) {
 
   const patch: Partial<BlogSettingsValues> = {};
   if (typeof body.autoPublish === 'boolean') patch.autoPublish = body.autoPublish;
+  if (typeof body.autoFix === 'boolean') patch.autoFix = body.autoFix;
   if (typeof body.defaultAuthor === 'string') patch.defaultAuthor = body.defaultAuthor;
   if (body.postsPerPage !== undefined) {
     const n = Number(body.postsPerPage);
