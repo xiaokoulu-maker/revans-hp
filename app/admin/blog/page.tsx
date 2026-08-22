@@ -30,8 +30,11 @@ function StatusBadge({ post }: { post: AdminPost }) {
   );
 }
 
+const nf = new Intl.NumberFormat('ja-JP');
+
 export default function AdminBlogListPage() {
   const [posts, setPosts] = useState<AdminPost[]>([]);
+  const [pvByPath, setPvByPath] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState<Filter>('all');
@@ -60,9 +63,24 @@ export default function AdminBlogListPage() {
     }
   }, []);
 
+  // 30日PV は補助情報。取得失敗しても一覧は表示する（別 fetch・非ブロッキング）。
+  const loadPv = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/analytics/posts?days=30', { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = await res.json();
+      setPvByPath(data.byPath ?? {});
+    } catch {
+      /* PV は補助のため失敗は無視 */
+    }
+  }, []);
+
   useEffect(() => {
     load();
-  }, [load]);
+    loadPv();
+  }, [load, loadPv]);
+
+  const pvOf = useCallback((slug: string) => pvByPath[`/blog/${slug}`] ?? 0, [pvByPath]);
 
   const counts = useMemo(
     () => ({
@@ -152,6 +170,7 @@ export default function AdminBlogListPage() {
                 <th>ステータス</th>
                 <th>種別</th>
                 <th>カテゴリ</th>
+                <th style={{ textAlign: 'right' }}>30日PV</th>
                 <th>公開日</th>
                 <th style={{ textAlign: 'right' }}>操作</th>
               </tr>
@@ -179,6 +198,9 @@ export default function AdminBlogListPage() {
                     ) : (
                       <span className={styles.rowSlug}>未設定</span>
                     )}
+                  </td>
+                  <td style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums', fontWeight: 700 }}>
+                    {post.status === 'published' ? nf.format(pvOf(post.slug)) : '—'}
                   </td>
                   <td>{formatDate(post.publishedAt)}</td>
                   <td>
@@ -220,6 +242,7 @@ export default function AdminBlogListPage() {
                 <div className={styles.postCardMeta}>
                   <span>/blog/{post.slug}</span>
                   <span>・{formatDate(post.publishedAt)}</span>
+                  {post.status === 'published' && <span>・30日PV {nf.format(pvOf(post.slug))}</span>}
                 </div>
                 <div className={styles.postCardActions}>
                   {post.needsReview && (

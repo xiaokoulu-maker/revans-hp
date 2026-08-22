@@ -32,9 +32,16 @@ const IconGear = (
     <path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 0 1-4 0v-.1A1.6 1.6 0 0 0 7 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0-1.1-2.7H1a2 2 0 0 1 0-4h.1A1.6 1.6 0 0 0 2.6 7a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H7a1.6 1.6 0 0 0 1-1.5V1a2 2 0 0 1 4 0v.1A1.6 1.6 0 0 0 17 2.6a1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V7a1.6 1.6 0 0 0 1.5 1H23a2 2 0 0 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z" />
   </svg>
 );
+const IconChart = (
+  <svg className={styles.navIcon} viewBox="0 0 24 24">
+    <path d="M3 3v18h18" />
+    <path d="M7 15l3.5-4 3 3L21 7" />
+  </svg>
+);
 
 const NAV: NavItem[] = [
   { href: '/admin/blog', label: '記事一覧', icon: IconDoc },
+  { href: '/admin/analytics', label: '分析', icon: IconChart },
   { href: '/admin/blog/calendar', label: '投稿カレンダー', icon: IconCalendar },
   { href: '/admin/blog/settings', label: '設定', icon: IconGear },
 ];
