@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { SITE } from '@/lib/site';
+import Tracker from '@/components/analytics/Tracker';
 import './globals.css';
 
 // 参照元デザインに合わせ、フォントは外部読み込みせずシステムフォントスタックを使用
@@ -38,7 +39,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body className="antialiased">{children}</body>
+      <body className="antialiased">
+        {children}
+        <Tracker />
+      </body>
     </html>
   );
 }
