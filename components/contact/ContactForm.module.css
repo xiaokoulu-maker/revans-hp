@@ -60,6 +60,28 @@
   cursor: pointer;
 }
 
+/* honeypot: 視覚・スクリーンリーダー・タブ移動のいずれからも隠す（display:none だと
+   一部botに無視されるため、画面外へ追い出す方式にする） */
+.hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* 送信失敗時のエラーメッセージ */
+.error {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: #b42318;
+  background: #fef3f2;
+  border: 1px solid #fecdc9;
+  border-radius: var(--r-sm);
+  padding: 12px 14px;
+  margin: 0;
+}
+
 .note {
   font-size: 12px;
   color: #637083;
@@ -79,10 +101,15 @@
   transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), background 0.2s var(--ease);
   cursor: pointer;
 }
-.submit:hover {
+.submit:hover:not(:disabled) {
   transform: translateY(-2px);
   background: var(--blue-dark);
   box-shadow: 0 16px 34px rgba(23, 105, 255, 0.3);
+}
+.submit:disabled {
+  opacity: 0.62;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 /* 送信完了ビュー */

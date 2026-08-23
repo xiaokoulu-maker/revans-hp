@@ -16,18 +16,56 @@ const TOPICS = [
 
 export default function ContactForm() {
   const [done, setDone] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
     if (!form.checkValidity()) {
       form.reportValidity();
       return;
     }
-    // TODO(送信): フォームバックエンド未接続。Formspree / メール送信 / CRM 等に接続する。
-    //             現状は送信完了ビューの表示のみ（データ送信は行っていない）。
-    setDone(true);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (sending) return;
+
+    setError(null);
+    setSending(true);
+
+    const data = new FormData(form);
+    const payload = {
+      name: String(data.get('name') ?? ''),
+      email: String(data.get('email') ?? ''),
+      company: String(data.get('company') ?? ''),
+      topic: String(data.get('topic') ?? ''),
+      message: String(data.get('message') ?? ''),
+      website: String(data.get('website') ?? ''), // honeypot（人間は空のまま）
+    };
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const body = (await res.json().catch(() => null)) as { error?: string } | null;
+        setError(
+          body?.error ??
+            '送信に失敗しました。時間をおいて再度お試しください。解決しない場合はメールで直接ご連絡ください。',
+        );
+        setSending(false);
+        return;
+      }
+
+      setDone(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch {
+      setError(
+        'ネットワークエラーで送信できませんでした。通信環境をご確認のうえ、再度お試しください。',
+      );
+      setSending(false);
+    }
   };
 
   if (done) {
@@ -50,6 +88,12 @@ export default function ContactForm() {
 
   return (
     <form className={styles.form} onSubmit={handleSubmit} noValidate>
+      {/* honeypot: 画面外に隠す。bot が埋めるとサーバー側で破棄される。人間は触れない。 */}
+      <div className={styles.hp} aria-hidden="true">
+        <label htmlFor="f-website">ウェブサイト（入力しないでください）</label>
+        <input id="f-website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+      </div>
+
       <div className={styles.field}>
         <label htmlFor="f-name">
           お名前<span className={styles.req}>必須</span>
@@ -92,15 +136,22 @@ export default function ContactForm() {
           name="message"
           required
           rows={6}
+          maxLength={5000}
           placeholder="例：問い合わせが月0件で、何から手を付ければいいか相談したい"
         />
       </div>
 
+      {error && (
+        <p className={styles.error} role="alert" aria-live="assertive">
+          {error}
+        </p>
+      )}
+
       <p className={styles.note}>
         送信いただいた内容は、ご相談への回答以外の目的には使用しません。
       </p>
-      <button className={styles.submit} type="submit">
-        この内容で送信する
+      <button className={styles.submit} type="submit" disabled={sending}>
+        {sending ? '送信中…' : 'この内容で送信する'}
       </button>
     </form>
   );
