@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Image from 'next/image';
 import styles from '@/components/admin/admin.module.css';
 
 function LoginForm() {
@@ -43,8 +44,7 @@ function LoginForm() {
     <div className={styles.loginWrap}>
       <form className={styles.loginCard} onSubmit={handleSubmit}>
         <div className={styles.loginBrand}>
-          <span className={styles.brandMark}>R</span>
-          REVANS
+          <Image src="/brand/logo-revans.png" alt="REVANS" width={140} height={28} priority />
         </div>
         <h1 className={styles.loginTitle}>管理画面ログイン</h1>
 

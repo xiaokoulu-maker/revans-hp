@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import SiteMotion from "./site-motion";
 
 const navigation = [
@@ -17,8 +18,15 @@ export const ArrowIcon = () => (
 
 export const Logo = ({ footer = false }: { footer?: boolean }) => (
   <Link className={`logo${footer ? " footer-logo" : ""}`} href="/" aria-label="REVANS トップへ">
-    <span className="logo-mark" aria-hidden="true"><b>R</b><i /></span>
-    <span className="logo-type"><strong>REVANS</strong><small>DIGITAL CRAFT</small></span>
+    {/* 横ロゴ 1195x239（正確に 5:1）。濃色のフッターは白版を使用 */}
+    <Image
+      className="logo-img"
+      src={footer ? "/brand/logo-revans-white.png" : "/brand/logo-revans.png"}
+      alt="REVANS"
+      width={160}
+      height={32}
+      priority
+    />
   </Link>
 );
 

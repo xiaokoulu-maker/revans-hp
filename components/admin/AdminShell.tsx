@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import styles from './admin.module.css';
 
@@ -82,7 +83,7 @@ export default function AdminShell({
     <div className={styles.shell}>
       <aside className={`${styles.sidebar} ${open ? styles.sidebarOpen : ''}`}>
         <div className={styles.brand}>
-          <span className={styles.brandMark}>R</span>
+          <Image className={styles.brandMark} src="/brand/logo-mark-white.png" alt="" width={33} height={28} priority />
           <span>
             REVANS
             <br />

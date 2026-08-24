@@ -90,7 +90,7 @@ export default async function BlogPostPage({
     publisher: {
       '@type': 'Organization',
       name: SITE.name,
-      logo: { '@type': 'ImageObject', url: `${SITE.url}${SITE.ogImage}` },
+      logo: { '@type': 'ImageObject', url: `${SITE.url}${SITE.logo}` },
     },
     ...(post.targetKeywords ? { keywords: post.targetKeywords.join(', ') } : {}),
   };
