@@ -21,10 +21,9 @@ svg { display: block; }
 .site-header { position: fixed; inset: 0 0 auto; z-index: 50; height: 76px; background: rgba(255,255,255,.9); border-bottom: 1px solid rgba(214,222,232,.8); backdrop-filter: blur(18px); }
 .site-header::after { content: ""; position: absolute; left: 6%; right: 6%; bottom: -1px; height: 1px; background: linear-gradient(90deg, transparent, rgba(23,105,255,.38), transparent); }
 .header-inner { height: 100%; display: flex; align-items: center; }
-.logo { display: inline-flex; align-items: center; gap: 11px; font-size: 18px; font-weight: 800; letter-spacing: .13em; }
-.logo-mark { width: 30px; height: 30px; display: grid; place-items: center; color: #fff; font-size: 15px; font-weight: 800; letter-spacing: 0; border-radius: 9px 9px 9px 3px; background: linear-gradient(140deg, var(--blue) 0 62%, #ff7349 63%); box-shadow: 0 6px 15px rgba(23,105,255,.22); }
-.logo-mark { transition: transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s; }
-.logo:hover .logo-mark { transform: rotate(-7deg) scale(1.06); box-shadow: 0 10px 22px rgba(23,105,255,.3); }
+.logo { display: inline-flex; align-items: center; }
+.logo-img { display: block; height: 32px; width: auto; transition: transform .35s cubic-bezier(.22,1,.36,1); }
+.logo:hover .logo-img { transform: translateY(-1px); }
 .desktop-nav { margin-left: auto; display: flex; align-items: center; gap: 34px; font-size: 13px; font-weight: 600; color: #344257; }
 .desktop-nav a { transition: color .2s; }
 .desktop-nav a:hover { color: var(--blue); }
@@ -216,8 +215,7 @@ footer { background: #061124; color: #fff; }
   .shell { width: min(calc(100% - 34px), 620px); }
   .site-header { height: 66px; }
   .desktop-nav, .header-cta { display: none; }
-  .logo { font-size: 16px; }
-  .logo-mark { width: 27px; height: 27px; font-size: 13px; }
+  .logo-img { height: 26px; }
   .mobile-nav { display: block; position: relative; margin-left: auto; }
   .mobile-nav summary { width: 40px; height: 40px; list-style: none; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; cursor: pointer; }
   .mobile-nav summary::-webkit-details-marker { display: none; }
@@ -683,74 +681,7 @@ main { position: relative; overflow: clip; }
   .availability i { animation: none; }
 }
 
-/* REVANS precision monogram */
-.logo { gap: 12px; line-height: 1; }
-.logo-mark {
-  width: 35px;
-  height: 35px;
-  position: relative;
-  isolation: isolate;
-  overflow: visible;
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  border-radius: 0;
-  color: #fff;
-  background: none;
-  box-shadow: none;
-  transition: transform .35s cubic-bezier(.22,1,.36,1);
-}
-.logo-mark::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  inset: 0;
-  clip-path: polygon(11% 0, 100% 0, 89% 100%, 0 100%);
-  background: linear-gradient(145deg, #07182f 0 50%, #1769ff 51% 100%);
-  box-shadow: 0 9px 22px rgba(7,31,65,.18);
-}
-.logo-mark::after {
-  content: "";
-  position: absolute;
-  z-index: 2;
-  width: 2px;
-  height: 21px;
-  right: -2px;
-  top: 6px;
-  transform: skewX(-11deg);
-  background: #ff7653;
-  box-shadow: 0 0 0 3px rgba(255,118,83,.07);
-}
-.logo-mark b {
-  transform: translateX(-1px) skewX(-6deg);
-  font-size: 16px;
-  font-weight: 950;
-  letter-spacing: -.08em;
-}
-.logo-mark i {
-  width: 12px;
-  height: 1px;
-  position: absolute;
-  left: 7px;
-  bottom: 5px;
-  background: rgba(255,255,255,.72);
-}
-.logo-type { display: flex; flex-direction: column; gap: 4px; }
-.logo-type strong { font-size: 17px; font-weight: 850; letter-spacing: .18em; }
-.logo-type small { color: #8995a5; font-family: ui-monospace, monospace; font-size: 5px; font-weight: 800; letter-spacing: .29em; }
-.logo:hover .logo-mark { transform: translateY(-2px) rotate(-3deg); box-shadow: none; }
-.footer-logo .logo-type strong { color: #fff; }
-.footer-logo .logo-type small { color: #63738a; }
-
-@media (max-width: 760px) {
-  .logo { gap: 10px; }
-  .logo-mark { width: 31px; height: 31px; }
-  .logo-mark::after { height: 19px; top: 5px; }
-  .logo-mark b { font-size: 14px; }
-  .logo-mark i { width: 10px; left: 6px; bottom: 4px; }
-  .logo-type strong { font-size: 15px; }
-  .logo-type small { font-size: 4.5px; }
-}
+/* REVANS ロゴ画像。フッターは白版画像のため追加の色指定は不要 */
 
 /* Multi-page system */
 .desktop-nav a.is-active { color: var(--blue); }

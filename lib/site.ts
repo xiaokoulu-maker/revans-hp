@@ -12,6 +12,8 @@ export const SITE = {
   /** 所在地（法人格は未確定のため会社名は付さない） */
   location: '東京都世田谷区',
   area: '全国オンライン対応',
-  ogImage: '/ogp.png',
+  ogImage: '/brand/ogp-light.png',
+  /** ロゴ（JSON-LD 等の絶対URL生成に使用。横ロゴ 1195x239） */
+  logo: '/brand/logo-revans.png',
   hours: '受付：平日 10:00–19:00',
 } as const;

@@ -35,14 +35,9 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 .brandMark {
-  width: 30px;
-  height: 30px;
-  display: grid;
-  place-items: center;
-  border-radius: 9px 9px 9px 3px;
-  background: linear-gradient(140deg, var(--blue) 0 62%, #ff7349 63%);
-  font-size: 14px;
-  font-weight: 800;
+  height: 28px;
+  width: auto;
+  display: block;
 }
 .brandSub {
   font-size: 10px;
