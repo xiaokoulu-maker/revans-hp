@@ -1,6 +1,13 @@
+import type { Metadata } from "next";
 import SiteMotion from "./site-motion";
 import Link from "next/link";
 import { SiteHeader, SiteFooter } from "./site-chrome";
+
+// トップだけ canonical が未設定だと、プレビュー用ドメイン（*.vercel.app）で配信された
+// トップが正規URL不明のまま重複扱いされ得る。自己参照 canonical を明示する。
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
 
 const services = [
   {
